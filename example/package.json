@@ -1,5 +1,5 @@
 {
-  "name": "react-native-gradient-avatars-example",
+  "name": "gulitars-example",
   "version": "0.0.0",
   "private": true,
   "main": "index.ts",
@@ -13,7 +13,7 @@
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-gradient-avatars": "file:..",
+    "gulitars": "file:..",
     "react-native-svg": "15.15.4"
   },
   "devDependencies": {

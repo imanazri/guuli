@@ -1,7 +1,10 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-	entry: { index: "src/index.ts" },
+	// Two entries, not one with a re-export: Metro does not tree-shake, so a
+	// named export from the root would land in every consumer's bundle whether
+	// or not they import it. A separate entry is a separate module graph.
+	entry: { index: "src/index.ts", crypto: "src/crypto.ts" },
 	format: ["esm", "cjs"],
 	dts: true,
 	clean: true,

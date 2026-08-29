@@ -1,4 +1,4 @@
-# react-native-gradient-avatars
+# Gulitars
 
 Deterministic generative gradient avatars for React Native and Expo. Give it a
 user id, an email, anything — it paints a unique mesh gradient. The same seed
@@ -18,7 +18,7 @@ gives the same colours on both.
 ## Install
 
 ```sh
-npx expo install react-native-gradient-avatars react-native-svg
+npx expo install gulitars react-native-svg
 ```
 
 Peers: `react >= 18`, `react-native >= 0.79`, `react-native-svg >= 13`.
@@ -26,7 +26,7 @@ Peers: `react >= 18`, `react-native >= 0.79`, `react-native-svg >= 13`.
 ## Usage
 
 ```tsx
-import { GradientAvatar } from "react-native-gradient-avatars";
+import { GradientAvatar } from "gulitars";
 
 function UserAvatar({ user }) {
   return <GradientAvatar seed={user.id} size={40} />;
@@ -73,7 +73,7 @@ The palette engine is exported, for when you want the colours without the
 avatar — a gradient header, a chart series, a tinted card.
 
 ```ts
-import { generatePalette, seedFromString } from "react-native-gradient-avatars";
+import { generatePalette, seedFromString } from "gulitars";
 
 const { colors, harmony } = generatePalette("jane@example.com");
 // → { colors: ["#BD59F2", "#FBB42C", "#58FDC4"], harmony: "triadic", seed: 2231369329 }
@@ -84,6 +84,58 @@ const { colors, harmony } = generatePalette("jane@example.com");
 | `generatePalette(seed)` | The colours and harmony rule behind a seed. |
 | `seedFromString(input)` / `toSeed(seed)` | The hashing that turns any value into a numeric seed. |
 | `buildMeshScene(seed, displaySize)` | The full layout as plain data, if you want to render it yourself. |
+
+## Crypto addresses
+
+If you seed on a blockchain address, import `seedForAddress` and use it. It is
+a separate entry point, so it costs nothing (319 B gzipped) unless you do:
+
+```tsx
+import { GradientAvatar } from "gulitars";
+import { seedForAddress } from "gulitars/crypto";
+
+<GradientAvatar seed={seedForAddress(account.address)} size={40} />
+```
+
+Without it, **one address renders several different avatars**. An explorer
+displays EIP-55 checksummed hex while its API returns lowercase, and a Bitcoin
+QR code encodes bech32 in uppercase — so the same account gets a different face
+depending on which code path drew it.
+
+Lowercasing everything is not the fix. Solana and legacy Bitcoin addresses are
+base58, where case is part of the value and lowercasing yields a *different
+address*. So only the provably case-insensitive formats are touched:
+
+| Format | Case | Treatment |
+|---|---|---|
+| EVM `0x…` — addresses, tx and block hashes | insensitive; EIP-55 is a checksum written into the casing | lowercased |
+| BTC bech32 `bc1…` / `tb1…` / `bcrt1…`, incl. taproot | insensitive; mixed case is *invalid* per BIP-173 | lowercased |
+| Solana base58 | **significant** | untouched |
+| BTC legacy `1…` / `3…` base58 | **significant** | untouched |
+| Anything else | — | untouched |
+
+Unrecognised input is returned as-is, so it is always safe to call and never
+throws. The same address gives the same avatar on every chain — an address is
+one identity whether you are viewing it on Ethereum, Polygon, or Arbitrum.
+
+### Seed on the address, not on an ENS name
+
+A name is a label on an account, not the account. Names can be changed, and
+they expire and get re-registered — so a name-keyed avatar would hand the
+previous owner's exact face to whoever registers it next, which in an explorer
+is an impersonation vector rather than a cosmetic problem. Seeding on the
+address also means an account looks the same whether or not reverse resolution
+happened to land.
+
+In an explorer this costs nothing: names are resolved *from* addresses, so you
+already hold the address.
+
+### A useful side effect
+
+Address-poisoning attacks mint an address sharing the victim's first and last
+few characters, which is all a truncated UI shows. Those collide as text and
+not at all as avatars — eight lookalikes of `0xd8da…6045` produce eight
+obviously different marks.
 
 ## Performance
 

@@ -1,5 +1,5 @@
 /**
- * Palette engine for react-native-gradient-avatars.
+ * Palette engine for gulitars.
  *
  * Ported verbatim from `@outpacelabs/avatars` (MIT, Outpace Studios) so that a
  * seed renders the same colors here as it does on the web. Pure math, no

@@ -1,12 +1,14 @@
 /**
- * Visual check for react-native-gradient-avatars.
+ * Visual check for gulitars.
  *
  * Three things worth looking at, in order:
  *  - the size ramp, which is where the level-of-detail logic either works or
  *    turns small avatars into mud;
  *  - a dense grid, where you can see whether neighbouring seeds actually look
  *    different from each other;
- *  - a long list, which is the only honest test of scroll performance.
+ *  - a long list, which is the only honest test of scroll performance;
+ *  - the address row, where each group must render as ONE avatar for the
+ *    case-insensitive formats and as two distinct ones for base58.
  */
 import { useMemo, useState } from "react";
 import {
@@ -19,11 +21,66 @@ import {
 	TextInput,
 	View,
 } from "react-native";
-import { GradientAvatar, generatePalette } from "react-native-gradient-avatars";
+import { GradientAvatar, generatePalette } from "gulitars";
+import { seedForAddress } from "gulitars/crypto";
 
 const SIZE_RAMP = [16, 24, 32, 40, 64, 96, 160];
 const GRID_SEEDS = Array.from({ length: 60 }, (_, i) => `user-${i}`);
 const LIST_SEEDS = Array.from({ length: 200 }, (_, i) => `member-${i}@acme.com`);
+
+/**
+ * One entry per address family, each holding the casings that entry turns up
+ * in. `sameAccount` says what the row is asserting: for the case-insensitive
+ * formats every avatar in the group must look identical, and for base58 they
+ * must not, because lowercasing base58 yields a different address.
+ */
+const ADDRESS_GROUPS: Array<{
+	label: string;
+	sameAccount: boolean;
+	variants: string[];
+}> = [
+	{
+		label: "EVM — EIP-55 / lower / upper",
+		sameAccount: true,
+		variants: [
+			"0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+			"0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"0xD8DA6BF26964AF9D7EED9E03E53415D37AA96045",
+		],
+	},
+	{
+		label: "BTC bech32 — lower / upper (QR)",
+		sameAccount: true,
+		variants: [
+			"bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+			"BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+		],
+	},
+	{
+		label: "BTC taproot — lower / upper",
+		sameAccount: true,
+		variants: [
+			"bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
+			"BC1P0XLXVLHEMJA6C4DQV22UAPCTQUPFHLXM9H8Z3K2E72Q4K9HCZ7VQZK5JJ0",
+		],
+	},
+	{
+		label: "Solana — case is part of the address",
+		sameAccount: false,
+		variants: [
+			"7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+			"7xkxtg2cw87d97txjsdpbd5jbkhetqa83tzrujosgasu",
+		],
+	},
+	{
+		label: "BTC legacy — case is part of the address",
+		sameAccount: false,
+		variants: [
+			"1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+			"1a1zp1ep5qgefi2dmptftl5slmv7divfna",
+		],
+	},
+];
 
 function Section({
 	title,
@@ -115,13 +172,41 @@ function Grid() {
  * the same orientation disables windowing, which would quietly turn the one
  * section meant to measure scroll performance into the one section that cannot.
  */
+function Addresses() {
+	return (
+		<Section
+			title="Addresses"
+			subtitle="seedForAddress: same account → same avatar, whatever the casing"
+		>
+			{ADDRESS_GROUPS.map((group) => (
+				<View key={group.label} style={styles.addressRow}>
+					<View style={styles.ramp}>
+						{group.variants.map((variant) => (
+							<GradientAvatar
+								key={variant}
+								seed={seedForAddress(variant)}
+								size={44}
+							/>
+						))}
+					</View>
+					<Text style={styles.caption}>
+						{group.sameAccount ? "must match →  " : "must differ →  "}
+						{group.label}
+					</Text>
+				</View>
+			))}
+		</Section>
+	);
+}
+
 function Header() {
 	return (
 		<View style={styles.header}>
-			<Text style={styles.heading}>react-native-gradient-avatars</Text>
+			<Text style={styles.heading}>gulitars</Text>
 			<Playground />
 			<Shapes />
 			<Grid />
+			<Addresses />
 			<Text style={styles.sectionTitle}>In a list</Text>
 			<Text style={styles.sectionSubtitle}>
 				200 rows — scroll it, watch for jank
@@ -175,6 +260,7 @@ const styles = StyleSheet.create({
 		fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
 	},
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	addressRow: { gap: 6 },
 	gridItem: {},
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	rowLabel: { fontSize: 14, color: "#3F3F46" },
