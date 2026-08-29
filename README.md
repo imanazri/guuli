@@ -47,11 +47,11 @@ import { seedForAddress } from "guuli/crypto";
 <GradientAvatar seed={seedForAddress(account.address)} size={40} />
 ```
 
-| Chain | Example |
-|---|---|
-| EVM | `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` |
-| Solana | `7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU` |
-| Bitcoin — bech32, taproot, legacy | `bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4` |
+| | Chain | Example |
+|:--:|---|---|
+| <img src="assets/chain-evm.webp" width="44" alt="" /> | EVM | `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` |
+| <img src="assets/chain-solana.webp" width="44" alt="" /> | Solana | `7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU` |
+| <img src="assets/chain-bitcoin.webp" width="44" alt="" /> | Bitcoin — bech32, taproot, legacy | `bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4` |
 
 Anything else passes through unchanged, so it's always safe to call.
 
