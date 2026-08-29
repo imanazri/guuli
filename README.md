@@ -32,6 +32,29 @@ cd ios && pod install
 Android autolinks — no extra step. If your app already uses `react-native-svg`,
 you only need `guuli`.
 
+## Blockchain addresses
+
+Supports **EVM** (Ethereum, Polygon, Arbitrum, Base, BNB Chain), **Solana** and
+**Bitcoin**.
+
+Wrap the address in `seedForAddress` so one account always gets one avatar —
+your UI shows checksummed hex, your API returns lowercase, a QR code encodes
+bech32 in uppercase, and all three should look identical:
+
+```tsx
+import { seedForAddress } from "guuli/crypto";
+
+<GradientAvatar seed={seedForAddress(account.address)} size={40} />
+```
+
+| Chain | Example |
+|---|---|
+| EVM | `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045` |
+| Solana | `7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU` |
+| Bitcoin — bech32, taproot, legacy | `bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4` |
+
+Anything else passes through unchanged, so it's always safe to call.
+
 ## Sizes
 
 Small avatars are drawn with fewer, larger shapes so they stay legible instead
