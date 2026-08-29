@@ -1,5 +1,5 @@
 /**
- * Palette engine for gulitars.
+ * Palette engine for randos.
  *
  * Pure math, no renderer, no platform APIs: a seed in, a palette out.
  *

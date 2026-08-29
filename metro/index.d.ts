@@ -1,6 +1,6 @@
-/** See metro.js — Metro config helper for consuming Gulitars from a local path. */
+/** See metro.js — Metro config helper for consuming Randos from a local path. */
 export declare const SINGLETONS: string[];
-export declare function withGulitars<T extends Record<string, unknown>>(
+export declare function withRandos<T extends Record<string, unknown>>(
 	config: T,
 	options?: {
 		/** Defaults to `config.projectRoot`, then `process.cwd()`. */
