@@ -9,8 +9,13 @@
  * `renderGradient` export path, which additionally zooms 1.24x -- is what a web
  * user actually sees.
  *
- * Run: node --import tsx scripts/compare.ts > /tmp/avcmp/index.html
+ * Run: node --import tsx scripts/compare.ts
+ * It writes a self-contained directory and prints where, ready to serve.
  */
+import { mkdirSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { renderAvatarSvg } from "./render-svg.ts";
 
 // Strings only: the harness round-trips seeds through DOM attributes, and a
@@ -44,7 +49,7 @@ const rows = SIZES.map((size) => {
     </section>`;
 }).join("");
 
-console.log(`<!doctype html>
+const html = `<!doctype html>
 <html><head><meta charset="utf-8"><title>parity</title>
 <style>
   body { font: 13px -apple-system, sans-serif; background:#fff; color:#111; margin:24px; }
@@ -59,6 +64,9 @@ console.log(`<!doctype html>
 </style></head>
 <body>
 ${rows}
+<script type="importmap">
+  { "imports": { "react": "./react-stub.js", "react/jsx-runtime": "./react-stub.js" } }
+</script>
 <script type="module">
   import { drawMeshGradient } from './avatars.js';
   const RENDER = 256;
@@ -76,4 +84,37 @@ ${rows}
   }
   document.title = 'ready';
 </script>
-</body></html>`);
+</body></html>`;
+
+const outDir = join(tmpdir(), "gradient-avatars-compare");
+mkdirSync(outDir, { recursive: true });
+writeFileSync(join(outDir, "index.html"), html);
+
+// The reference is an ESM bundle that imports React for its component, even
+// though we only call the engine out of it. A stub is enough to let the browser
+// load the module.
+writeFileSync(
+	join(outDir, "react-stub.js"),
+	`export const useRef = () => ({});
+export const useMemo = (f) => f();
+export const useEffect = () => {};
+export const jsx = () => null;
+export const jsxs = () => null;
+export default {};
+`,
+);
+
+const require = createRequire(import.meta.url);
+writeFileSync(
+	join(outDir, "avatars.js"),
+	require("node:fs").readFileSync(
+		require.resolve("@outpacelabs/avatars"),
+		"utf8",
+	),
+);
+
+console.log(`Wrote ${outDir}
+
+  python3 -m http.server 8731 --directory ${outDir}
+
+then open http://localhost:8731`);

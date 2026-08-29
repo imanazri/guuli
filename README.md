@@ -118,11 +118,15 @@ npm run build            # the example consumes dist/
 cd example && npm install && npm start
 ```
 
+The example targets the newest Expo SDK in the supported range, so it works
+with whatever Expo Go you already have; the package itself only needs RN 0.79.
+
 There is also a visual harness that renders this package's output next to the
-real web component in a browser, which is how the stop ramps were tuned:
+real web component in a browser, seed for seed. This is how the gradient stops
+were tuned, and it is the fastest way to check a change to them:
 
 ```sh
-node --import tsx scripts/compare.ts > /tmp/cmp/index.html
+node --import tsx scripts/compare.ts   # prints the directory and serve command
 ```
 
 ## License

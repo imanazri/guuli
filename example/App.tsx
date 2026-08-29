@@ -13,7 +13,6 @@ import {
 	FlatList,
 	Platform,
 	SafeAreaView,
-	ScrollView,
 	StatusBar,
 	StyleSheet,
 	Text,
@@ -80,7 +79,7 @@ function Shapes() {
 	return (
 		<Section title="Shapes" subtitle="radius defaults to a circle">
 			<View style={styles.ramp}>
-				{[undefined, 24, 12, 0].map((radius, i) => (
+				{[undefined, 24, 12, 0].map((radius) => (
 					<View key={String(radius)} style={styles.rampItem}>
 						<GradientAvatar seed="outpace" size={72} radius={radius} />
 						<Text style={styles.caption}>
@@ -108,21 +107,26 @@ function Grid() {
 	);
 }
 
-function Roster() {
+/**
+ * Everything above the roster, as the list's header.
+ *
+ * The roster has to be the screen's own FlatList rather than one section among
+ * several inside a ScrollView: nesting a virtualized list in a scroll view of
+ * the same orientation disables windowing, which would quietly turn the one
+ * section meant to measure scroll performance into the one section that cannot.
+ */
+function Header() {
 	return (
-		<Section title="In a list" subtitle="200 rows — scroll it, watch for jank">
-			<FlatList
-				data={LIST_SEEDS}
-				keyExtractor={(s) => s}
-				style={styles.list}
-				renderItem={({ item }) => (
-					<View style={styles.row}>
-						<GradientAvatar seed={item} size={40} />
-						<Text style={styles.rowLabel}>{item}</Text>
-					</View>
-				)}
-			/>
-		</Section>
+		<View style={styles.header}>
+			<Text style={styles.heading}>react-native-gradient-avatars</Text>
+			<Playground />
+			<Shapes />
+			<Grid />
+			<Text style={styles.sectionTitle}>In a list</Text>
+			<Text style={styles.sectionSubtitle}>
+				200 rows — scroll it, watch for jank
+			</Text>
+		</View>
 	);
 }
 
@@ -130,20 +134,26 @@ export default function App() {
 	return (
 		<SafeAreaView style={styles.screen}>
 			<StatusBar barStyle="dark-content" />
-			<ScrollView contentContainerStyle={styles.content}>
-				<Text style={styles.heading}>react-native-gradient-avatars</Text>
-				<Playground />
-				<Shapes />
-				<Grid />
-				<Roster />
-			</ScrollView>
+			<FlatList
+				data={LIST_SEEDS}
+				keyExtractor={(s) => s}
+				ListHeaderComponent={Header}
+				contentContainerStyle={styles.content}
+				renderItem={({ item }) => (
+					<View style={styles.row}>
+						<GradientAvatar seed={item} size={40} />
+						<Text style={styles.rowLabel}>{item}</Text>
+					</View>
+				)}
+			/>
 		</SafeAreaView>
 	);
 }
 
 const styles = StyleSheet.create({
 	screen: { flex: 1, backgroundColor: "#FFFFFF" },
-	content: { padding: 20, paddingBottom: 64, gap: 32 },
+	content: { padding: 20, paddingBottom: 64 },
+	header: { gap: 32, marginBottom: 12 },
 	heading: { fontSize: 22, fontWeight: "700", color: "#111111" },
 	section: { gap: 12 },
 	sectionTitle: { fontSize: 15, fontWeight: "600", color: "#111111" },
@@ -166,7 +176,6 @@ const styles = StyleSheet.create({
 	},
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	gridItem: {},
-	list: { height: 320, borderWidth: 1, borderColor: "#E4E4E7", borderRadius: 12 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 10 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	rowLabel: { fontSize: 14, color: "#3F3F46" },
 });
