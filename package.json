@@ -1,0 +1,103 @@
+{
+  "name": "guuli",
+  "version": "0.1.0",
+  "description": "Deterministic generative gradient avatars for React Native and Expo. Every seed renders a unique mesh gradient, with no stored images and no network.",
+  "keywords": [
+    "react-native",
+    "expo",
+    "avatars",
+    "generative",
+    "generative-avatars",
+    "gradient",
+    "mesh-gradient",
+    "avatar-generator",
+    "profile-pictures",
+    "svg",
+    "ethereum",
+    "solana",
+    "bitcoin",
+    "blockies",
+    "web3"
+  ],
+  "homepage": "https://github.com/imanazri/guuli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imanazri/guuli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imanazri/guuli/issues"
+  },
+  "license": "MIT",
+  "author": "Iman Nazri",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "react-native": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./crypto": {
+      "import": {
+        "types": "./dist/crypto.d.ts",
+        "default": "./dist/crypto.js"
+      },
+      "require": {
+        "types": "./dist/crypto.d.cts",
+        "default": "./dist/crypto.cjs"
+      }
+    },
+    "./metro": {
+      "types": "./metro/index.d.ts",
+      "default": "./metro/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "crypto.js",
+    "crypto.d.ts",
+    "metro",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node --import tsx --import ./test/stubs/register.ts --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.79",
+    "react-native-svg": ">=13"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-test-renderer": "^19.1.0",
+    "react": "^19.0.0",
+    "react-native": "^0.81.0",
+    "react-native-svg": "^15.12.1",
+    "react-test-renderer": "^19.0.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

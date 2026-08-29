@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # The manifest can look right while the packed tarball is broken, so both
+      # of these run against `npm pack` output rather than package.json.
+      - name: Lint the published package
+        run: npx --yes publint@latest
+
+      - name: Check type resolution across module systems
+        run: npx --yes @arethetypeswrong/cli@latest --pack .
