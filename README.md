@@ -1,4 +1,4 @@
-# Guli
+# Guuli
 
 Deterministic generative gradient avatars for React Native and Expo. Give it a
 user id, an email, anything — it paints a unique mesh gradient. The same seed
@@ -14,7 +14,7 @@ migrate, or fetch**.
 ## Install
 
 ```sh
-npx expo install guli react-native-svg
+npx expo install guuli react-native-svg
 ```
 
 Peers: `react >= 18`, `react-native >= 0.79`, `react-native-svg >= 13`.
@@ -22,7 +22,7 @@ Peers: `react >= 18`, `react-native >= 0.79`, `react-native-svg >= 13`.
 ## Usage
 
 ```tsx
-import { GradientAvatar } from "guli";
+import { GradientAvatar } from "guuli";
 
 function UserAvatar({ user }) {
   return <GradientAvatar seed={user.id} size={40} />;
@@ -69,7 +69,7 @@ The palette engine is exported, for when you want the colours without the
 avatar — a gradient header, a chart series, a tinted card.
 
 ```ts
-import { generatePalette, seedFromString } from "guli";
+import { generatePalette, seedFromString } from "guuli";
 
 const { colors, harmony } = generatePalette("jane@example.com");
 // → { colors: ["#BD59F2", "#FBB42C", "#58FDC4"], harmony: "triadic", seed: 2231369329 }
@@ -83,15 +83,15 @@ const { colors, harmony } = generatePalette("jane@example.com");
 
 ## Linking the package locally
 
-Installing from npm needs nothing extra. But if you consume Guli from a
+Installing from npm needs nothing extra. But if you consume Guuli from a
 local path — a `file:` dependency, `npm link`, or a workspace — add one line to
 `metro.config.js`:
 
 ```js
 const { getDefaultConfig } = require("expo/metro-config");
-const { withGuli } = require("guli/metro");
+const { withGuuli } = require("guuli/metro");
 
-module.exports = withGuli(getDefaultConfig(__dirname));
+module.exports = withGuuli(getDefaultConfig(__dirname));
 ```
 
 Without it you will hit one of these, usually at startup:
@@ -106,14 +106,14 @@ to debug. The cause is that a linked package keeps its own `node_modules` —
 holding the copies of `react`, `react-native` and `react-native-svg` this
 package installs to typecheck and test itself. Metro resolves those *as well
 as* your app's and loads each library twice; the second copy then fails to
-register its native views. `withGuli` pins all three to your app's copy.
+register its native views. `withGuuli` pins all three to your app's copy.
 
 If you linked the package's source rather than a packed tarball, say where, so
 Metro watches it for changes:
 
 ```js
-module.exports = withGuli(getDefaultConfig(__dirname), {
-  linkedRoot: path.resolve(__dirname, "../guli"),
+module.exports = withGuuli(getDefaultConfig(__dirname), {
+  linkedRoot: path.resolve(__dirname, "../guuli"),
 });
 ```
 
@@ -123,8 +123,8 @@ If you seed on a blockchain address, import `seedForAddress` and use it. It is
 a separate entry point, so it costs nothing (0.4 kB gzipped) unless you do:
 
 ```tsx
-import { GradientAvatar } from "guli";
-import { seedForAddress } from "guli/crypto";
+import { GradientAvatar } from "guuli";
+import { seedForAddress } from "guuli/crypto";
 
 <GradientAvatar seed={seedForAddress(account.address)} size={40} />
 ```
@@ -177,12 +177,12 @@ size of the files on disk.
 
 | | raw | gzipped |
 |---|---:|---:|
-| Guli core | 9.2 kB | **4.4 kB** |
-| `guli/crypto` | 0.9 kB | 0.4 kB |
+| Guuli core | 9.2 kB | **4.4 kB** |
+| `guuli/crypto` | 0.9 kB | 0.4 kB |
 | **total** | **10.1 kB** | **4.8 kB** |
 | `react-native-svg` | 181.9 kB | 65.4 kB |
 
-If your app already uses `react-native-svg` — charts, icons, QR codes — Guli
+If your app already uses `react-native-svg` — charts, icons, QR codes — Guuli
 costs 4.8 kB gzipped and nothing else. If it does not, budget for the library
 too, including the native code it compiles into your binary (not measured here;
 it is zero in Expo Go).
@@ -240,7 +240,7 @@ version bump, never to make a failing build pass.
 
 Rendering is checked against frozen geometry rather than by eye, so the suite
 runs anywhere with no simulator. To look at real output on a device, point any
-Expo app at the built package with `withGuli` in its Metro config — see
+Expo app at the built package with `withGuuli` in its Metro config — see
 [Linking the package locally](#linking-the-package-locally).
 
 ## License

@@ -1,5 +1,5 @@
 /**
- * Palette engine for guli.
+ * Palette engine for guuli.
  *
  * Pure math, no renderer, no platform APIs: a seed in, a palette out.
  *

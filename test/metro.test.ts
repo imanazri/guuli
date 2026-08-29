@@ -1,5 +1,5 @@
 /**
- * `withGuli` is a shipped export with a job that only shows up on a device:
+ * `withGuuli` is a shipped export with a job that only shows up on a device:
  * it stops a linked copy of the package from loading a second react-native-svg.
  * When it is wrong the app dies at startup with "Tried to register two views
  * with the same name RNSVGCircle", which names nothing that would lead you here.
@@ -15,7 +15,7 @@ import { describe, it } from "node:test";
 
 const require = createRequire(import.meta.url);
 // Loaded exactly as a consumer's CommonJS metro.config.js would load it.
-const { withGuli, SINGLETONS } = require("../metro/index.js");
+const { withGuuli, SINGLETONS } = require("../metro/index.js");
 
 const APP = "/app";
 const LINKED = "/pkg";
@@ -33,11 +33,11 @@ const context = () => {
 };
 
 const configure = (options?: Record<string, unknown>) =>
-	withGuli({ projectRoot: APP, resolver: {} }, options);
+	withGuuli({ projectRoot: APP, resolver: {} }, options);
 
-describe("withGuli", () => {
+describe("withGuuli", () => {
 	it("is requireable from a CommonJS metro.config.js", () => {
-		assert.equal(typeof withGuli, "function");
+		assert.equal(typeof withGuuli, "function");
 		assert.ok(Array.isArray(SINGLETONS));
 	});
 
@@ -100,7 +100,7 @@ describe("withGuli", () => {
 
 	it("chains a resolveRequest that was already configured", () => {
 		let called = false;
-		const config = withGuli({
+		const config = withGuuli({
 			projectRoot: APP,
 			resolver: {
 				resolveRequest: (_c: unknown, moduleName: string) => {
@@ -115,7 +115,7 @@ describe("withGuli", () => {
 	});
 
 	it("honours an explicit projectRoot over the config's", () => {
-		const config = withGuli(
+		const config = withGuuli(
 			{ projectRoot: "/wrong", resolver: {} },
 			{ projectRoot: APP },
 		);
