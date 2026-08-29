@@ -1,5 +1,5 @@
 {
-  "name": "randos",
+  "name": "guli",
   "version": "0.1.0",
   "description": "Deterministic generative gradient avatars for React Native and Expo. Every seed renders a unique mesh gradient, with no stored images and no network.",
   "keywords": [
@@ -19,13 +19,13 @@
     "blockies",
     "web3"
   ],
-  "homepage": "https://github.com/imanazri/randos#readme",
+  "homepage": "https://github.com/imanazri/guli#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imanazri/randos.git"
+    "url": "git+https://github.com/imanazri/guli.git"
   },
   "bugs": {
-    "url": "https://github.com/imanazri/randos/issues"
+    "url": "https://github.com/imanazri/guli/issues"
   },
   "license": "MIT",
   "author": "Iman Nazri",

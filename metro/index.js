@@ -1,5 +1,5 @@
 /**
- * Metro config helper for consuming Randos from a local path.
+ * Metro config helper for consuming Guli from a local path.
  *
  * Installing from npm needs none of this. It is for `file:` links, `npm link`
  * and workspaces, where the package directory keeps its own `node_modules` —
@@ -16,17 +16,17 @@
  *
  * ```js
  * const { getDefaultConfig } = require("expo/metro-config");
- * const { withRandos } = require("randos/metro");
+ * const { withGuli } = require("guli/metro");
  *
- * module.exports = withRandos(getDefaultConfig(__dirname));
+ * module.exports = withGuli(getDefaultConfig(__dirname));
  * ```
  *
  * If you linked the package's *source* rather than a packed tarball, tell it
  * where, so Metro watches that directory for changes too:
  *
  * ```js
- * module.exports = withRandos(getDefaultConfig(__dirname), {
- *   linkedRoot: path.resolve(__dirname, "../randos"),
+ * module.exports = withGuli(getDefaultConfig(__dirname), {
+ *   linkedRoot: path.resolve(__dirname, "../guli"),
  * });
  * ```
  */
@@ -45,7 +45,7 @@ const SINGLETONS = ["react", "react-native", "react-native-svg"];
  * @param {{ projectRoot?: string, linkedRoot?: string, singletons?: string[] }} [options]
  * @returns {object} the same config, with resolution pinned to one copy each
  */
-function withRandos(config, options = {}) {
+function withGuli(config, options = {}) {
 	const projectRoot =
 		options.projectRoot ?? config.projectRoot ?? process.cwd();
 	const singletons = options.singletons ?? SINGLETONS;
@@ -89,4 +89,4 @@ function withRandos(config, options = {}) {
 	return config;
 }
 
-module.exports = { withRandos, SINGLETONS };
+module.exports = { withGuli, SINGLETONS };

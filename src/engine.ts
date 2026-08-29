@@ -1,5 +1,5 @@
 /**
- * Palette engine for randos.
+ * Palette engine for guli.
  *
  * Pure math, no renderer, no platform APIs: a seed in, a palette out.
  *

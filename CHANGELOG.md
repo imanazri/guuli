@@ -14,11 +14,11 @@ fixtures in `test/` exist to make that impossible to do by accident.
 ### Added
 
 - `GradientAvatar` — deterministic mesh-gradient avatars for React Native and Expo.
-- `randos/crypto` — `seedForAddress`, a canonical seed for blockchain
+- `guli/crypto` — `seedForAddress`, a canonical seed for blockchain
   addresses. Normalises the formats whose case is not significant (EVM hex,
   Bitcoin bech32) and leaves base58 alone, so one address is one avatar however
   it is cased.
-- `randos/metro` — `withRandos`, a Metro config helper that pins `react`,
+- `guli/metro` — `withGuli`, a Metro config helper that pins `react`,
   `react-native` and `react-native-svg` to one copy. Needed only when consuming
   the package from a local path.
 - `generatePalette`, `seedFromString`, `toSeed` and `buildMeshScene` for driving
