@@ -85,6 +85,42 @@ const { colors, harmony } = generatePalette("jane@example.com");
 | `seedFromString(input)` / `toSeed(seed)` | The hashing that turns any value into a numeric seed. |
 | `buildMeshScene(seed, displaySize)` | The full layout as plain data, if you want to render it yourself. |
 
+## Linking the package locally
+
+Installing from npm needs nothing extra. But if you consume Gulitars from a
+local path — a `file:` dependency, `npm link`, or a workspace — add one line to
+`metro.config.js`:
+
+```js
+const { getDefaultConfig } = require("expo/metro-config");
+const { withGulitars } = require("gulitars/metro");
+
+module.exports = withGulitars(getDefaultConfig(__dirname));
+```
+
+Without it you will hit one of these, usually at startup:
+
+```
+Tried to register two views with the same name RNSVGCircle
+TurboModuleRegistry.getEnforcing(...): 'PlatformConstants' could not be found
+```
+
+Neither message mentions module resolution, which is what makes them expensive
+to debug. The cause is that a linked package keeps its own `node_modules` — 
+holding the copies of `react`, `react-native` and `react-native-svg` this
+package installs to typecheck and test itself. Metro resolves those *as well
+as* your app's and loads each library twice; the second copy then fails to
+register its native views. `withGulitars` pins all three to your app's copy.
+
+If you linked the package's source rather than a packed tarball, say where, so
+Metro watches it for changes:
+
+```js
+module.exports = withGulitars(getDefaultConfig(__dirname), {
+  linkedRoot: path.resolve(__dirname, "../gulitars"),
+});
+```
+
 ## Crypto addresses
 
 If you seed on a blockchain address, import `seedForAddress` and use it. It is

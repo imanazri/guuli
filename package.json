@@ -54,12 +54,18 @@
         "default": "./dist/crypto.cjs"
       }
     },
+    "./metro": {
+      "types": "./metro.d.ts",
+      "default": "./metro.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "crypto.js",
     "crypto.d.ts",
+    "metro.cjs",
+    "metro.d.ts",
     "README.md",
     "LICENSE"
   ],
