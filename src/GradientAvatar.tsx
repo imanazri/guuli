@@ -85,34 +85,28 @@ function GradientAvatarInner({
 		>
 			<Svg width={size} height={size} viewBox={`0 0 ${FRAME} ${FRAME}`}>
 				<Defs>
-					{scene.spots.map((spot, i) => (
-						<RadialGradient
-							// Spots are positional and never reordered within a scene.
-							// biome-ignore lint/suspicious/noArrayIndexKey: stable by construction
-							key={i}
-							id={`${uid}s${i}`}
-							gradientUnits="userSpaceOnUse"
-							cx={spot.x}
-							cy={spot.y}
-							r={spot.radius * SPOT_EXTENT}
-						>
+					{/*
+					 * One gradient per palette colour, not per spot. Every spot shares
+					 * the same normalised ramp and differs only in where it sits and
+					 * how big it is, so with the default `objectBoundingBox` units a
+					 * single definition maps itself onto each circle it fills. Since a
+					 * palette is two to four colours and a mesh is up to nine spots,
+					 * this is roughly half the nodes — and in react-native-svg every
+					 * <Stop> is a real view, so nodes are what a screenful costs.
+					 */}
+					{scene.palette.map((color, i) => (
+						<RadialGradient key={color} id={`${uid}c${i}`}>
 							{SPOT_STOPS.map(([offset, opacity]) => (
 								<Stop
 									key={offset}
 									offset={offset}
-									stopColor={spot.color}
+									stopColor={color}
 									stopOpacity={opacity}
 								/>
 							))}
 						</RadialGradient>
 					))}
-					<RadialGradient
-						id={`${uid}h`}
-						gradientUnits="userSpaceOnUse"
-						cx={scene.highlight.x}
-						cy={scene.highlight.y}
-						r={scene.highlight.radius * HIGHLIGHT_EXTENT}
-					>
+					<RadialGradient id={`${uid}h`}>
 						{HIGHLIGHT_STOPS.map(([offset, opacity]) => (
 							<Stop
 								key={offset}
@@ -127,11 +121,11 @@ function GradientAvatarInner({
 				<Rect x={0} y={0} width={FRAME} height={FRAME} fill={scene.background} />
 
 				{/*
-				 * Each spot's alpha reaches exactly 0 on its own boundary, so a
-				 * circle covers everything the gradient can paint. The web original
-				 * fills the whole frame per spot only because Canvas2D gradients do
-				 * not clip; drawing the circle is identical output with a fraction of
-				 * the overdraw, which is what a list of avatars actually feels.
+				 * Each spot's alpha reaches exactly 0 at the end of its ramp, so a
+				 * circle drawn to that point covers everything the gradient can
+				 * paint. The web original fills the whole frame per spot only because
+				 * Canvas2D gradients do not clip; the circle is the same output with
+				 * a fraction of the overdraw, which is what a list of avatars feels.
 				 */}
 				{scene.spots.map((spot, i) => (
 					<Circle
@@ -140,7 +134,7 @@ function GradientAvatarInner({
 						cx={spot.x}
 						cy={spot.y}
 						r={spot.radius * SPOT_EXTENT}
-						fill={`url(#${uid}s${i})`}
+						fill={`url(#${uid}c${spot.colorIndex})`}
 					/>
 				))}
 

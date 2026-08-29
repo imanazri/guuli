@@ -6,7 +6,7 @@ always produces the same avatar, so **there is no image to store, upload,
 migrate, or fetch**.
 
 - **Deterministic.** A user id *is* the avatar. No CDN, no upload pipeline, no broken images.
-- **Small.** ~2.7 kB gzipped, zero runtime dependencies.
+- **Small.** ~2.8 kB gzipped, zero runtime dependencies; 9 kB in a release bundle.
 - **Works in Expo Go.** `react-native-svg` is the only peer, and Expo already bundles it.
 - **Legible at every size.** A 24 px avatar is drawn simpler than a 160 px one, on purpose.
 - **Typed**, and works on react-native-web too.
@@ -84,6 +84,29 @@ const { colors, harmony } = generatePalette("jane@example.com");
 | `generatePalette(seed)` | The colours and harmony rule behind a seed. |
 | `seedFromString(input)` / `toSeed(seed)` | The hashing that turns any value into a numeric seed. |
 | `buildMeshScene(seed, displaySize)` | The full layout as plain data, if you want to render it yourself. |
+
+## Performance
+
+Measured on an Android emulator running a **development** bundle in Expo Go —
+a release build is meaningfully faster, so read these as a ceiling.
+
+| | |
+|---|---|
+| Layout math, uncached | 23 µs per avatar (Hermes) · 3.6 µs (V8) |
+| Layout math, cached | 1.5 µs per avatar |
+| Mount, per avatar @40px | 3.7 ms — against 0.7 ms for a bare `<Svg>` and 0.2 ms for a plain `<View>` |
+| Scrolling a 200-row list | no measurable difference from plain `<View>` rows |
+| Bundle | 9 kB, plus 178 kB for `react-native-svg` if you do not already have it |
+
+Mounting is the whole cost, and it is node count: `react-native-svg` makes a
+real view out of every `<Stop>`. That is why a scene exposes its `palette` and
+spots reference it by index — one gradient is defined per *colour* rather than
+per spot, which is 43–53% fewer nodes since a palette is two to four colours
+and a mesh is up to nine spots. Once mounted, avatars are free: a `FlatList`
+scrolls them exactly as fast as flat-coloured circles.
+
+If you render a very large grid at once, mount cost is what you will feel;
+`FlatList`/`FlashList` windowing avoids it by construction.
 
 ## Differences from `@outpacelabs/avatars`
 

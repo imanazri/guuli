@@ -14,6 +14,7 @@ import renderer from "react-test-renderer";
 import { createElement } from "react";
 
 import { GradientAvatar } from "../src/GradientAvatar.tsx";
+import { buildMeshScene } from "../src/scene.ts";
 
 type Node = {
 	type: string;
@@ -49,13 +50,40 @@ function collect(node: Node, type: string): Node[] {
 describe("GradientAvatar", () => {
 	it("renders a background, one circle per spot, and the highlight", () => {
 		const tree = render(createElement(GradientAvatar, { seed: "acme", size: 96 }));
-		const rects = collect(tree, "Rect");
-		const circles = collect(tree, "Circle");
-		const gradients = collect(tree, "RadialGradient");
+		const scene = buildMeshScene("acme", 96);
 
-		assert.equal(rects.length, 1, "one opaque base fill");
-		assert.equal(gradients.length, circles.length, "a gradient per circle");
-		assert.ok(circles.length >= 5, "spots plus the highlight");
+		assert.equal(collect(tree, "Rect").length, 1, "one opaque base fill");
+		assert.equal(
+			collect(tree, "Circle").length,
+			scene.spots.length + 1,
+			"a circle per spot, plus the highlight",
+		);
+	});
+
+	it("defines one gradient per palette colour, not per spot", () => {
+		// This is what keeps a screenful of avatars affordable: in
+		// react-native-svg every <Stop> is a real view, so the node count is the
+		// cost, and spots outnumber colours two or three to one.
+		const tree = render(createElement(GradientAvatar, { seed: "acme", size: 96 }));
+		const scene = buildMeshScene("acme", 96);
+
+		assert.ok(scene.spots.length > scene.palette.length, "worth sharing at all");
+		assert.equal(
+			collect(tree, "RadialGradient").length,
+			scene.palette.length + 1,
+			"a gradient per colour, plus the highlight",
+		);
+
+		// Sharing only works if the gradients are in bounding-box units, so each
+		// one re-maps itself onto whichever circle references it. An explicit
+		// userSpaceOnUse would pin every spot to one position.
+		for (const g of collect(tree, "RadialGradient")) {
+			assert.equal(
+				g.props.gradientUnits,
+				undefined,
+				"must inherit the objectBoundingBox default",
+			);
+		}
 	});
 
 	it("points every fill at a gradient that exists", () => {

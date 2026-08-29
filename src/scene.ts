@@ -29,8 +29,10 @@ export interface MeshSpot {
 	x: number;
 	y: number;
 	radius: number;
-	/** Hex `#RRGGBB` from the seed's palette. */
+	/** Hex `#RRGGBB`, also at `palette[colorIndex]` on the scene. */
 	color: string;
+	/** Index into {@link MeshScene.palette}. */
+	colorIndex: number;
 }
 
 export interface MeshHighlight {
@@ -42,6 +44,17 @@ export interface MeshHighlight {
 export interface MeshScene {
 	/** The numeric seed this scene was built from. */
 	seed: number;
+	/**
+	 * The distinct colours the spots draw from, already trimmed to the level of
+	 * detail. Two to four of them, however many spots there are.
+	 *
+	 * Spots reference this by index rather than each carrying its own colour,
+	 * because every spot shares one normalised alpha ramp and differs only in
+	 * position, size, and colour. A renderer can therefore define one gradient
+	 * per colour instead of one per spot -- which, in SVG, is the difference
+	 * between a dozen gradient nodes and three.
+	 */
+	palette: string[];
 	/** Opaque base fill, the palette's first colour. */
 	background: string;
 	/** Largest first, already trimmed to the level of detail. */
@@ -131,6 +144,7 @@ function computeMeshScene(seed: number | string, displaySize: number): MeshScene
 			y: centerY + (random() - 0.5) * FRAME * 0.3,
 			radius: FRAME * (0.3 + random() * 0.4),
 			color: palette[i % palette.length],
+			colorIndex: i % palette.length,
 		});
 	}
 
@@ -153,6 +167,7 @@ function computeMeshScene(seed: number | string, displaySize: number): MeshScene
 		y: mid + (raw.y - mid) * spread,
 		radius: raw.radius * grow,
 		color: raw.color,
+		colorIndex: raw.colorIndex,
 	}));
 
 	// Drawn after the spot loop, so these draw from the stream last.
@@ -162,7 +177,7 @@ function computeMeshScene(seed: number | string, displaySize: number): MeshScene
 		radius: FRAME * 0.3,
 	};
 
-	return { seed: s, background: palette[0], spots: kept, highlight };
+	return { seed: s, palette, background: palette[0], spots: kept, highlight };
 }
 
 /**

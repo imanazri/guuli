@@ -31,18 +31,18 @@ export function renderAvatarSvg(
 			.join("");
 
 	const defs = [
-		...scene.spots.map(
-			(spot, i) =>
-				`<radialGradient id="${uid}s${i}" gradientUnits="userSpaceOnUse" cx="${spot.x}" cy="${spot.y}" r="${spot.radius * SPOT_EXTENT}">${stops(SPOT_STOPS, spot.color)}</radialGradient>`,
+		...scene.palette.map(
+			(color, i) =>
+				`<radialGradient id="${uid}c${i}">${stops(SPOT_STOPS, color)}</radialGradient>`,
 		),
-		`<radialGradient id="${uid}h" gradientUnits="userSpaceOnUse" cx="${scene.highlight.x}" cy="${scene.highlight.y}" r="${scene.highlight.radius * HIGHLIGHT_EXTENT}">${stops(HIGHLIGHT_STOPS, "#FFFFFF")}</radialGradient>`,
+		`<radialGradient id="${uid}h">${stops(HIGHLIGHT_STOPS, "#FFFFFF")}</radialGradient>`,
 	].join("");
 
 	const body = [
 		`<rect x="0" y="0" width="${FRAME}" height="${FRAME}" fill="${scene.background}"/>`,
 		...scene.spots.map(
-			(spot, i) =>
-				`<circle cx="${spot.x}" cy="${spot.y}" r="${spot.radius * SPOT_EXTENT}" fill="url(#${uid}s${i})"/>`,
+			(spot) =>
+				`<circle cx="${spot.x}" cy="${spot.y}" r="${spot.radius * SPOT_EXTENT}" fill="url(#${uid}c${spot.colorIndex})"/>`,
 		),
 		`<circle cx="${scene.highlight.x}" cy="${scene.highlight.y}" r="${scene.highlight.radius * HIGHLIGHT_EXTENT}" fill="url(#${uid}h)"/>`,
 	].join("");
