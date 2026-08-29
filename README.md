@@ -14,8 +14,42 @@ migrate, or fetch**.
 ## Install
 
 ```sh
+npm install guuli react-native-svg
+```
+
+**Bare React Native** — link the native side for iOS; Android autolinks:
+
+```sh
+cd ios && pod install
+```
+
+**Expo** — install through the Expo CLI instead:
+
+```sh
 npx expo install guuli react-native-svg
 ```
+
+The difference is not stylistic. `react-native-svg` ships native code, and its
+JavaScript has to match the binary that code was compiled into:
+
+- In **bare React Native**, and in an **Expo dev build**, that binary is
+  compiled from your `node_modules` — so whatever version you install is the
+  version that gets built, and they cannot disagree. Any version works.
+- In **Expo Go** the binary is prebuilt and fixed, so the JavaScript must match
+  the version that SDK shipped. `npx expo install` reads that from the SDK and
+  pins it; plain `npm install` takes the newest release matching `>=13`, which
+  is usually a version no SDK ships. A mismatch surfaces as
+  `TurboModuleRegistry.getEnforcing('PlatformConstants')` or
+  `Tried to register two views with the same name RNSVGCircle` — neither of
+  which mentions a version.
+
+`react-native-svg` is a peer dependency rather than a dependency so that your
+app keeps exactly one copy of it. As a normal dependency, npm could nest a
+second copy under `guuli/`, and two copies of a native module is the
+registration crash above, permanently.
+
+If your app already uses `react-native-svg` — charts, icons, QR codes — you
+only need `guuli`.
 
 Peers: `react >= 18`, `react-native >= 0.79`, `react-native-svg >= 13`.
 
