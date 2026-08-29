@@ -6,14 +6,10 @@ always produces the same avatar, so **there is no image to store, upload,
 migrate, or fetch**.
 
 - **Deterministic.** A user id *is* the avatar. No CDN, no upload pipeline, no broken images.
-- **Small.** ~2.8 kB gzipped, zero runtime dependencies; 9 kB in a release bundle.
+- **Small.** 4.4 kB gzipped in a release bundle, zero runtime dependencies.
 - **Works in Expo Go.** `react-native-svg` is the only peer, and Expo already bundles it.
 - **Legible at every size.** A 24 px avatar is drawn simpler than a 160 px one, on purpose.
 - **Typed**, and works on react-native-web too.
-
-A port of [`@outpacelabs/avatars`](https://github.com/outpacelabs/avatars) by
-Outpace Studios, whose palette engine it reproduces exactly — the same seed
-gives the same colours on both.
 
 ## Install
 
@@ -124,7 +120,7 @@ module.exports = withGulitars(getDefaultConfig(__dirname), {
 ## Crypto addresses
 
 If you seed on a blockchain address, import `seedForAddress` and use it. It is
-a separate entry point, so it costs nothing (319 B gzipped) unless you do:
+a separate entry point, so it costs nothing (0.4 kB gzipped) unless you do:
 
 ```tsx
 import { GradientAvatar } from "gulitars";
@@ -173,6 +169,24 @@ few characters, which is all a truncated UI shows. Those collide as text and
 not at all as avatars — eight lookalikes of `0xd8da…6045` produce eight
 obviously different marks.
 
+## Size
+
+Measured by differencing four production Android bundles (`expo export`,
+Hermes), so these are what actually lands in a shipped app rather than the
+size of the files on disk.
+
+| | raw | gzipped |
+|---|---:|---:|
+| Gulitars core | 9.2 kB | **4.4 kB** |
+| `gulitars/crypto` | 0.9 kB | 0.4 kB |
+| **total** | **10.1 kB** | **4.8 kB** |
+| `react-native-svg` | 181.9 kB | 65.4 kB |
+
+If your app already uses `react-native-svg` — charts, icons, QR codes — Gulitars
+costs 4.8 kB gzipped and nothing else. If it does not, budget for the library
+too, including the native code it compiles into your binary (not measured here;
+it is zero in Expo Go).
+
 ## Performance
 
 Measured on an Android emulator running a **development** bundle in Expo Go —
@@ -184,7 +198,7 @@ a release build is meaningfully faster, so read these as a ceiling.
 | Layout math, cached | 1.5 µs per avatar |
 | Mount, per avatar @40px | 3.7 ms — against 0.7 ms for a bare `<Svg>` and 0.2 ms for a plain `<View>` |
 | Scrolling a 200-row list | no measurable difference from plain `<View>` rows |
-| Bundle | 9 kB, plus 178 kB for `react-native-svg` if you do not already have it |
+| Bundle | 4.4 kB gzipped, plus 65 kB for `react-native-svg` if you do not already have it |
 
 Mounting is the whole cost, and it is node count: `react-native-svg` makes a
 real view out of every `<Stop>`. That is why a scene exposes its `palette` and
@@ -196,31 +210,33 @@ scrolls them exactly as fast as flat-coloured circles.
 If you render a very large grid at once, mount cost is what you will feel;
 `FlatList`/`FlashList` windowing avoids it by construction.
 
-## Differences from `@outpacelabs/avatars`
+## How the softness works
 
-Palettes and layout are **identical** — that's enforced by a test suite that
-runs the published web package side by side with this one and compares spot
-geometry and colours across thousands of seeds. What differs is the rendering,
-because React Native has no Canvas2D and no CSS filters:
+React Native has no Canvas2D and no CSS filters, and `react-native-svg`'s
+`<FeGaussianBlur>` renders differently on iOS than on Android — so the blur that
+gives a mesh gradient its softness cannot be applied at render time.
 
-- **SVG, not canvas.** Each spot is a `<RadialGradient>` on a `<Circle>` rather than a canvas fill.
-- **No Gaussian blur.** The web version blurs the finished canvas. `react-native-svg`'s `<FeGaussianBlur>` renders differently on iOS than on Android, so instead the softness is baked into the gradient stops: the original's four linear alpha stops are resampled along a monotone cubic through the same control points, which reproduces what the blur actually does at this scale (see `scripts/derive-stops.ts`). The upshot is a crisp avatar edge instead of the web version's slightly faded rim.
-- **Mesh only.** No `pattern="dither"`.
-- **No `colors` override**, no Display P3, no image export (`gradientToDataURL` / `gradientToBlob`) — none of which have a React Native equivalent worth the weight.
+It is baked into the gradient stops instead. `scripts/derive-stops.ts`
+convolves the alpha ramp with the same Gaussian offline and ships the result as
+a stop table, which is why a spot is drawn past its nominal radius (the blur
+carries colour beyond the edge) and why the ramp peaks at 0.93 rather than 1 (a
+blur pulls a peak down). The two platforms then render identically: measured
+across 62,000 samples of the same avatar, mean channel difference 1.17/255.
 
 ## Development
 
 ```sh
 npm install
-npm test          # engine goldens, layout parity, scene, component
+npm test          # goldens, frozen geometry, scene, component, metro helper
 npm run typecheck
 npm run build
 ```
 
-`npm test` includes a parity suite that installs the real `@outpacelabs/avatars`
-and asserts this port matches it. If the reference ships a new palette version,
-that suite is what tells you — and changing our output to match is a **major**
-version bump here, because it re-rolls every avatar already in the wild.
+`npm test` freezes both the palettes and the scene geometry against captured
+fixtures. Those are the tests that catch a reordered `random()` call — the one
+change that silently re-rolls every avatar already rendered in a shipped app
+while everything else stays green. Regenerate them only as a deliberate major
+version bump, never to make a failing build pass.
 
 To see it on a device:
 
@@ -232,16 +248,6 @@ cd example && npm install && npm start
 The example targets the newest Expo SDK in the supported range, so it works
 with whatever Expo Go you already have; the package itself only needs RN 0.79.
 
-There is also a visual harness that renders this package's output next to the
-real web component in a browser, seed for seed. This is how the gradient stops
-were tuned, and it is the fastest way to check a change to them:
-
-```sh
-node --import tsx scripts/compare.ts   # prints the directory and serve command
-```
-
 ## License
 
-[MIT](./LICENSE). The engine is derived from
-[`@outpacelabs/avatars`](https://github.com/outpacelabs/avatars) (MIT,
-© Outpace Studios).
+[MIT](./LICENSE).

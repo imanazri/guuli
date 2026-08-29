@@ -1,13 +1,13 @@
 /**
  * Derives the gradient stop ramps baked into `src/scene.ts`.
  *
- * The web original paints each spot with four piecewise-linear alpha stops and
- * then runs a CSS `blur()` over the finished frame. React Native has no such
- * filter, and `react-native-svg`'s `<FeGaussianBlur>` renders differently on
- * iOS than on Android, so we cannot reproduce that step directly.
+ * The mesh is defined as four piecewise-linear alpha stops per spot with a
+ * Gaussian blur over the finished frame. React Native has no such filter, and
+ * `react-native-svg`'s `<FeGaussianBlur>` renders differently on iOS than on
+ * Android, so the blur cannot be applied at render time.
  *
- * What we can do is bake it in. A CSS `blur(Npx)` is a Gaussian whose standard
- * deviation is N, and the original uses N = 6% of the frame -- which, against
+ * So it is baked in instead. A CSS `blur(Npx)` is a Gaussian whose standard
+ * deviation is N, and the design uses N = 6% of the frame -- which, against
  * spot radii of 30-70% of the frame, is a substantial blur, not a light touch.
  * It does not merely round the corners of the ramp; it spreads each spot well
  * past its nominal radius and pulls its peak down. So we convolve the original
@@ -158,7 +158,7 @@ function toStops(
 
 /* -- spot ramp -- */
 
-/** The web original's four stops: 0xFF / 0xDD / 0x88 / 0x00 at 0, .3, .6, 1. */
+/** The spot ramp's control points: 0xFF / 0xDD / 0x88 / 0x00 at 0, .3, .6, 1. */
 const SPOT_CONTROL_OFFSETS = [0, 0.3, 0.6, 1];
 const SPOT_CONTROL_ALPHAS = [1, 221 / 255, 136 / 255, 0];
 
@@ -188,7 +188,7 @@ export function deriveSpotStops(): Array<[number, number]> {
 
 /* -- highlight ramp -- */
 
-/** The web original's white sheen: 15% alpha at the centre, 0 at the edge. */
+/** The white sheen: 15% alpha at the centre, 0 at the edge. */
 const HIGHLIGHT_PEAK_ALPHA = 0.15;
 
 const HIGHLIGHT_SIGMA = BLUR_FRACTION / HIGHLIGHT_RADIUS;

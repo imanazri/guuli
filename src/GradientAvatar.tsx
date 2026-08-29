@@ -123,9 +123,8 @@ function GradientAvatarInner({
 				{/*
 				 * Each spot's alpha reaches exactly 0 at the end of its ramp, so a
 				 * circle drawn to that point covers everything the gradient can
-				 * paint. The web original fills the whole frame per spot only because
-				 * Canvas2D gradients do not clip; the circle is the same output with
-				 * a fraction of the overdraw, which is what a list of avatars feels.
+				 * paint. Filling the whole frame per spot would be the same output with
+				 * far more overdraw, which is what a list of avatars feels.
 				 */}
 				{scene.spots.map((spot, i) => (
 					<Circle

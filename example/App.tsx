@@ -138,7 +138,7 @@ function Shapes() {
 			<View style={styles.ramp}>
 				{[undefined, 24, 12, 0].map((radius) => (
 					<View key={String(radius)} style={styles.rampItem}>
-						<GradientAvatar seed="outpace" size={72} radius={radius} />
+						<GradientAvatar seed="studio" size={72} radius={radius} />
 						<Text style={styles.caption}>
 							{radius === undefined ? "default" : `radius ${radius}`}
 						</Text>

@@ -1,0 +1,6 @@
+{
+  "//": "The root package is ESM, but a Metro config is CommonJS and requires this helper. Declaring the type here keeps index.js CommonJS without a .cjs extension, which is what lets legacy resolvers that ignore \"exports\" still find it.",
+  "type": "commonjs",
+  "main": "./index.js",
+  "types": "./index.d.ts"
+}

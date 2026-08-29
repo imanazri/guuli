@@ -24,7 +24,7 @@ import {
 	SPOT_EXTENT as derivedSpotExtent,
 } from "../scripts/derive-stops.ts";
 
-const SEEDS = ["jane@example.com", "acme", "outpace", 42, 0, "user-7"];
+const SEEDS = ["jane@example.com", "acme", "studio", 42, 0, "user-7"];
 
 describe("level of detail", () => {
 	it("keeps only the largest spots at the smallest size", () => {

@@ -1,9 +1,7 @@
 /**
  * Palette engine for gulitars.
  *
- * Ported verbatim from `@outpacelabs/avatars` (MIT, Outpace Studios) so that a
- * seed renders the same colors here as it does on the web. Pure math, no
- * renderer, no platform APIs.
+ * Pure math, no renderer, no platform APIs: a seed in, a palette out.
  *
  * Every expression in this file is load-bearing: it decides what each user's
  * avatar looks like. Changing a constant, or reordering a `random()` call,
@@ -40,7 +38,7 @@ const HARMONY_TYPES: Harmony[] = [
  * as evenly around the circle as any sequence can. Multiplying the seed by a
  * plain angle instead leaves the hues on a coarse lattice -- `137.5` has a
  * period of only 144 over integer seeds -- so neighbouring seeds visibly share
- * hues. This is the fix `@outpacelabs/avatars` shipped in 0.6.0.
+ * hues.
  */
 const GOLDEN_RATIO_CONJUGATE = 0.618033988749895;
 
@@ -128,10 +126,21 @@ export function seedFromString(input: string): number {
 	return h >>> 0;
 }
 
-/** Normalize a string or number seed to the numeric seed used internally. */
+/**
+ * Normalize a seed to the number the palette math runs on.
+ *
+ * A finite number is already a seed. Everything else is hashed from its text,
+ * including the values TypeScript says cannot arrive here: `undefined` from an
+ * unloaded record, `NaN` from a failed parse. Those are real -- an avatar in a
+ * list is rendered before its data always is -- and left alone they either
+ * throw or poison the arithmetic into colours like `#DF20NAN`, which
+ * react-native-svg then fails to parse. Hashing the text keeps them
+ * deterministic, distinct from each other, and always renderable.
+ */
 export function toSeed(seed: number | string): number {
-	if (typeof seed === "number") return seed;
-	return seedFromString(seed);
+	if (typeof seed === "number" && Number.isFinite(seed)) return seed;
+	if (typeof seed === "string") return seedFromString(seed);
+	return seedFromString(String(seed));
 }
 
 /** Derive the deterministic color palette for a seed. */

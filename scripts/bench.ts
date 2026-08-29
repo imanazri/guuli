@@ -50,7 +50,7 @@ console.log("  in react-native-svg every <Stop> is a real view, so stops dominat
 console.log(`  ${"size".padStart(4)} ${"spots".padStart(5)} ${"colours".padStart(7)} ${"gradients".padStart(9)} ${"stops".padStart(5)} ${"vs per-spot".padStart(11)}`);
 for (const size of [16, 24, 32, 40, 64, 96, 160]) {
   clearSceneCache();
-  const s = buildMeshScene("outpace", size);
+  const s = buildMeshScene("studio", size);
   const spots = s.spots.length;
   const colours = s.palette.length;
   const gradients = colours + 1;

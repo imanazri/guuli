@@ -55,8 +55,8 @@
       }
     },
     "./metro": {
-      "types": "./metro.d.ts",
-      "default": "./metro.cjs"
+      "types": "./metro/index.d.ts",
+      "default": "./metro/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -64,8 +64,7 @@
     "dist",
     "crypto.js",
     "crypto.d.ts",
-    "metro.cjs",
-    "metro.d.ts",
+    "metro",
     "README.md",
     "LICENSE"
   ],
@@ -82,7 +81,6 @@
     "react-native-svg": ">=13"
   },
   "devDependencies": {
-    "@outpacelabs/avatars": "^0.6.0",
     "@types/react": "^19.0.0",
     "@types/react-test-renderer": "^19.1.0",
     "react": "^19.0.0",
@@ -96,5 +94,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

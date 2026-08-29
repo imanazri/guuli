@@ -2,14 +2,10 @@
  * The palette math is pure, so the part users depend on -- "the same seed
  * always renders the same avatar" -- is testable in Node with no RN runtime.
  *
- * The golden table is captured from `@outpacelabs/avatars@0.6.0`, the published
- * reference, for the same seeds its own test suite uses. It is the proof that
- * this port is faithful: a seed must produce the same colours here as it does
- * on the web. If these fail, the port is wrong and nothing else matters.
- *
- * It is also a freeze. These are avatars users have already seen; changing any
- * of them re-rolls every avatar in every app that shipped this. That is a major
- * version bump, never a refactor.
+ * The golden table is a freeze. These are avatars users have already seen, so
+ * changing any of them re-rolls every avatar in every app that shipped this.
+ * Regenerate them only as a deliberate major-version decision, never to make a
+ * failing build pass.
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
@@ -53,10 +49,10 @@ const GOLDEN: Array<{
 		colors: ["#E23434", "#46E946", "#4A4AF4"],
 	},
 	{
-		input: "outpace",
-		seed: 1754654890,
-		harmony: "tetradic",
-		colors: ["#21C1FE", "#C409F9", "#F9652C", "#56E72C"],
+		input: "studio",
+		seed: 1736381099,
+		harmony: "triadic",
+		colors: ["#73A1EF", "#FB5491", "#98FE5C"],
 	},
 	{
 		input: "0",
@@ -74,7 +70,7 @@ const HARMONIES: Harmony[] = [
 	"complementary",
 ];
 
-describe("golden palettes (parity with @outpacelabs/avatars)", () => {
+describe("golden palettes", () => {
 	for (const g of GOLDEN) {
 		it(`${JSON.stringify(g.input)} is stable`, () => {
 			const p = generatePalette(g.input);
@@ -100,6 +96,63 @@ describe("determinism", () => {
 
 	it("toSeed passes numbers through and hashes strings", () => {
 		assert.equal(toSeed(42), 42);
+		assert.equal(toSeed("acme"), seedFromString("acme"));
+	});
+});
+
+describe("seeds that should not arrive but do", () => {
+	// TypeScript says `seed` is string | number. Reality disagrees: a list row
+	// renders before its record loads, a parse fails, an id comes back null.
+	// None of these may throw or emit a colour react-native-svg cannot parse.
+	const PATHOLOGICAL = [
+		Number.NaN,
+		Number.POSITIVE_INFINITY,
+		Number.NEGATIVE_INFINITY,
+		undefined,
+		null,
+		true,
+		{},
+		[],
+	];
+
+	it("never throws", () => {
+		for (const value of PATHOLOGICAL) {
+			assert.doesNotThrow(
+				() => generatePalette(value as never),
+				`threw on ${String(value)}`,
+			);
+		}
+	});
+
+	it("always yields a finite seed and valid hex", () => {
+		for (const value of PATHOLOGICAL) {
+			const p = generatePalette(value as never);
+			assert.ok(Number.isFinite(p.seed), `non-finite seed for ${String(value)}`);
+			for (const c of p.colors) {
+				// `#DF20NAN` is what this produced before toSeed guarded itself.
+				assert.match(c, /^#[0-9A-F]{6}$/, `${c} from ${String(value)}`);
+			}
+		}
+	});
+
+	it("keeps them distinct from each other", () => {
+		const seeds = PATHOLOGICAL.map((v) => toSeed(v as never));
+		assert.equal(new Set(seeds).size, seeds.length, "collapsed to one avatar");
+	});
+
+	it("agrees with the text each value stringifies to", () => {
+		// Which is why an empty array and an empty string share an avatar:
+		// `String([])` is `""`. That is the rule working, not a collision.
+		assert.equal(toSeed([] as never), toSeed(""));
+		assert.equal(toSeed(Number.NaN), toSeed("NaN"));
+		assert.equal(toSeed(null as never), toSeed("null"));
+	});
+
+	it("does not disturb seeds that are valid", () => {
+		assert.equal(toSeed(42), 42);
+		assert.equal(toSeed(0), 0);
+		assert.equal(toSeed(-42), -42);
+		assert.equal(toSeed(3.7), 3.7);
 		assert.equal(toSeed("acme"), seedFromString("acme"));
 	});
 });

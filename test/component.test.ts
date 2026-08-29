@@ -157,7 +157,7 @@ describe("GradientAvatar", () => {
 	it("draws fewer shapes when small", () => {
 		const count = (size: number) =>
 			collect(
-				render(createElement(GradientAvatar, { seed: "outpace", size })),
+				render(createElement(GradientAvatar, { seed: "studio", size })),
 				"Circle",
 			).length;
 		assert.ok(count(16) < count(160), `${count(16)} vs ${count(160)}`);

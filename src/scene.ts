@@ -2,10 +2,9 @@
  * Turns a seed into a renderer-agnostic description of the mesh: a background
  * colour, a list of soft radial spots, and a white highlight.
  *
- * The web original interleaves this layout with its Canvas2D calls, so you
- * cannot get at it without a canvas. Splitting it out is what makes the port
- * testable in Node, and what would let a second renderer drop in later without
- * touching the math.
+ * Keeping the layout separate from the drawing is what makes it testable in
+ * Node with no renderer at all, and what would let a second renderer drop in
+ * later without touching the math.
  *
  * The geometry is normalised to a 100x100 frame, so the SVG that consumes it is
  * resolution independent.
@@ -66,7 +65,7 @@ export interface MeshScene {
 /**
  * How far past its nominal radius a spot must be drawn.
  *
- * The stops below have the original's blur baked into them, and a blur carries
+ * The stops below have the blur baked into them, and a blur carries
  * colour beyond the edge it started at. Drawing only to `radius` would clip
  * that tail off and put back the hard edge we are trying to avoid.
  */
@@ -75,11 +74,11 @@ export const SPOT_EXTENT = 1.36;
 /**
  * Alpha ramp for a spot, as `[offset, alpha]` pairs over the extended radius.
  *
- * This is the original's four-stop ramp convolved with the same Gaussian its
- * CSS `blur()` applies -- see `scripts/derive-stops.ts` for the derivation and
- * why it has to be a 2D convolution. That is also why the ramp starts at 0.93
- * rather than 1: a blur pulls a peak down, and skipping that is what makes an
- * unblurred copy read as too saturated.
+ * This is the four-stop ramp convolved with the Gaussian that would otherwise
+ * be applied as a blur over the finished frame -- see `scripts/derive-stops.ts`
+ * for the derivation and why it has to be a 2D convolution. That is also why the
+ * ramp starts at 0.93 rather than 1: a blur pulls a peak down, and skipping that
+ * is what makes an unblurred copy read as too saturated.
  *
  * Alpha is exactly 0 at offset 1, so a spot vanishes precisely on the circle
  * the renderer draws and leaves no visible edge.
@@ -121,9 +120,8 @@ export const HIGHLIGHT_STOPS: ReadonlyArray<readonly [number, number]> = [
  * avatar is the same avatar with its finer spots dropped and the survivors
  * grown to cover, not a different one.
  *
- * The order in which this consumes the random stream is load-bearing -- it
- * matches `drawMeshGradient` in `@outpacelabs/avatars` step for step. Reorder a
- * single call and every avatar changes.
+ * The order in which this consumes the random stream is load-bearing. Reorder
+ * a single call and every avatar already rendered anywhere changes.
  */
 function computeMeshScene(seed: number | string, displaySize: number): MeshScene {
 	const s = toSeed(seed);
