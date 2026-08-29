@@ -87,6 +87,34 @@ describe("case-insensitive formats collapse to one avatar", () => {
 	}
 });
 
+describe("ENS names", () => {
+	it("treats every casing of a name as one avatar", () => {
+		// ENS resolves through UTS-46, which lowercases, so these are one name.
+		const seeds = new Set(
+			["vitalik.eth", "Vitalik.eth", "VITALIK.ETH"].map(seedForAddress),
+		);
+		assert.equal(seeds.size, 1, "one name must not render several avatars");
+		assert.equal(seedForAddress("VITALIK.ETH"), "vitalik.eth");
+	});
+
+	it("handles subdomains", () => {
+		assert.equal(seedForAddress("Pay.Vitalik.ETH"), "pay.vitalik.eth");
+	});
+
+	it("leaves a unicode name alone rather than half-normalising it", () => {
+		// Full ENSIP-15 folds confusables and validates emoji, which needs a
+		// table this package will not carry. Not merging is the safe direction:
+		// two distinct names merging into one avatar would be worse.
+		assert.equal(seedForAddress("Café.eth"), "Café.eth");
+	});
+
+	it("does not touch names outside .eth", () => {
+		for (const value of ["Example.com", "Vitalik.sol", "Foo.crypto", "JaneDoe"]) {
+			assert.equal(seedForAddress(value), value);
+		}
+	});
+});
+
 describe("case-sensitive formats are left exactly alone", () => {
 	it("returns Solana addresses byte for byte", () => {
 		assert.equal(seedForAddress(SOLANA), SOLANA);
@@ -144,13 +172,15 @@ describe("case-sensitive formats are left exactly alone", () => {
 
 describe("anything else passes through", () => {
 	it("returns unrecognised input unchanged apart from trimming", () => {
+		// Not `vitalik.eth` — ENS is recognised now, and that example only
+		// passed because it was already lowercase.
 		for (const value of [
-			"vitalik.eth",
 			"some-username",
 			"",
 			"🚀",
 			"0xnothex",
 			"0x",
+			"Example.com",
 		]) {
 			assert.equal(seedForAddress(value), value.trim());
 		}
@@ -170,7 +200,8 @@ describe("idempotence", () => {
 			...BECH32_VECTORS.flatMap(([lower, upper]) => [lower, upper]),
 			SOLANA,
 			BTC_LEGACY,
-			"vitalik.eth",
+			"VITALIK.ETH",
+			"Pay.Vitalik.eth",
 			"",
 		];
 		for (const value of inputs) {

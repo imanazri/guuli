@@ -49,6 +49,19 @@ const BECH32_LOWER = /^(bc1|tb1|bcrt1)[02-9ac-hj-np-z]{6,71}$/;
 const BECH32_UPPER = /^(BC1|TB1|BCRT1)[02-9AC-HJ-NP-Z]{6,71}$/;
 
 /**
+ * ENS names, including subdomains: `vitalik.eth`, `pay.vitalik.eth`.
+ *
+ * ENS resolves names through UTS-46 (ENSIP-15), which lowercases, so
+ * `Vitalik.eth` and `vitalik.eth` are the same name and must be the same
+ * avatar. Only ASCII is matched here: full ENSIP-15 also folds unicode
+ * confusables and validates emoji sequences, which needs a ~30 kB table this
+ * package will not carry. A name with unicode in it falls through untouched,
+ * which is the safe direction -- an avatar that does not merge is better than
+ * two different names merging into one.
+ */
+const ENS_NAME = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.eth$/i;
+
+/**
  * The seed to render an address with, stable across the casings the same
  * address arrives in.
  *
@@ -61,9 +74,11 @@ const BECH32_UPPER = /^(BC1|TB1|BCRT1)[02-9AC-HJ-NP-Z]{6,71}$/;
  * unrecognised are returned unchanged, so this is always safe to call and never
  * throws.
  *
- * **Pass the address, not an ENS name.** A name is a label on an account, not
- * the account: it can be changed, and it can expire and be re-registered by
- * someone else, who would then inherit this avatar. Addresses cannot drift.
+ * ENS names are accepted and lowercased, since ENS treats them
+ * case-insensitively. Prefer the address they resolve to where you have it: a
+ * name is a label on an account rather than the account, so it can change
+ * hands, and an expired name re-registered by someone else would carry this
+ * avatar to them. An address cannot drift.
  *
  * The result is the same on every chain -- an address is one identity whether
  * you are looking at it on Ethereum, Polygon or Arbitrum.
@@ -75,6 +90,7 @@ export function seedForAddress(value: string): string {
 	if (BECH32_LOWER.test(trimmed) || BECH32_UPPER.test(trimmed)) {
 		return trimmed.toLowerCase();
 	}
+	if (ENS_NAME.test(trimmed)) return trimmed.toLowerCase();
 
 	// Solana and legacy Bitcoin are base58 and case-sensitive; anything else is
 	// not ours to reinterpret. Note that the two are never told apart, and do
