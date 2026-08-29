@@ -238,15 +238,10 @@ change that silently re-rolls every avatar already rendered in a shipped app
 while everything else stays green. Regenerate them only as a deliberate major
 version bump, never to make a failing build pass.
 
-To see it on a device:
-
-```sh
-npm run build            # the example consumes dist/
-cd example && npm install && npm start
-```
-
-The example targets the newest Expo SDK in the supported range, so it works
-with whatever Expo Go you already have; the package itself only needs RN 0.79.
+Rendering is checked against frozen geometry rather than by eye, so the suite
+runs anywhere with no simulator. To look at real output on a device, point any
+Expo app at the built package with `withGulitars` in its Metro config — see
+[Linking the package locally](#linking-the-package-locally).
 
 ## License
 

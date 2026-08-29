@@ -19,6 +19,7 @@
     "blockies",
     "web3"
   ],
+  "homepage": "https://github.com/imanazri/randos#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imanazri/randos.git"
@@ -27,6 +28,7 @@
     "url": "https://github.com/imanazri/randos/issues"
   },
   "license": "MIT",
+  "author": "Iman Nazri",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -75,6 +77,9 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "peerDependencies": {
     "react": ">=18",
     "react-native": ">=0.79",
@@ -94,8 +99,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "engines": {
-    "node": ">=18"
   }
 }
