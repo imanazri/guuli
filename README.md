@@ -6,7 +6,7 @@ always produces the same avatar, so **there is no image to store, upload,
 migrate, or fetch**.
 
 - **Deterministic.** A user id *is* the avatar. No CDN, no upload pipeline, no broken images.
-- **Small.** 4.4 kB gzipped in a release bundle, zero runtime dependencies.
+- **Small.** 4.5 kB gzipped in a release bundle, zero runtime dependencies.
 - **Works in Expo Go.** `react-native-svg` is the only peer, and Expo already bundles it.
 - **Legible at every size.** A 24 px avatar is drawn simpler than a 160 px one, on purpose.
 - **Typed**, and works on react-native-web too.
@@ -120,7 +120,7 @@ module.exports = withGuuli(getDefaultConfig(__dirname), {
 ## Crypto addresses
 
 If you seed on a blockchain address, import `seedForAddress` and use it. It is
-a separate entry point, so it costs nothing (0.4 kB gzipped) unless you do:
+a separate entry point, so it costs nothing (0.3 kB gzipped) unless you do:
 
 ```tsx
 import { GradientAvatar } from "guuli";
@@ -177,9 +177,9 @@ size of the files on disk.
 
 | | raw | gzipped |
 |---|---:|---:|
-| Guuli core | 9.2 kB | **4.4 kB** |
-| `guuli/crypto` | 0.9 kB | 0.4 kB |
-| **total** | **10.1 kB** | **4.8 kB** |
+| Guuli core | 8.8 kB | **4.5 kB** |
+| `guuli/crypto` | 0.9 kB | 0.3 kB |
+| **total** | **9.5 kB** | **4.8 kB** |
 | `react-native-svg` | 181.9 kB | 65.4 kB |
 
 If your app already uses `react-native-svg` — charts, icons, QR codes — Guuli
@@ -198,7 +198,7 @@ a release build is meaningfully faster, so read these as a ceiling.
 | Layout math, cached | 1.5 µs per avatar |
 | Mount, per avatar @40px | 3.7 ms — against 0.7 ms for a bare `<Svg>` and 0.2 ms for a plain `<View>` |
 | Scrolling a 200-row list | no measurable difference from plain `<View>` rows |
-| Bundle | 4.4 kB gzipped, plus 65 kB for `react-native-svg` if you do not already have it |
+| Bundle | 4.5 kB gzipped, plus 65 kB for `react-native-svg` if you do not already have it |
 
 Mounting is the whole cost, and it is node count: `react-native-svg` makes a
 real view out of every `<Stop>`. That is why a scene exposes its `palette` and
